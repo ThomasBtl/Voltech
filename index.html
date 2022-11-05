@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Voltech</title>
+        <link href="./css/index.css" rel="stylesheet">
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+        <script type="text/javascript" src="./javascript/index.js"></script>
+    </head>
+
+    <body>
+        <div id="main-page">
+            <div class="content">
+                <header>
+                    <h1>Voltech</h1>
+                </header>
+                <div id="map-wrapper">
+                    <div id="map"></div>
+                    <div id="legend">
+                        <span class="legend-title">potentiel</span>
+                        <span class="legend-top-value">excellent</span>
+                        <span class="legend-bottom-value">inexistant</span>
+                    </div>
+                </div>
+                <div class="adr-input-box">
+                    <p class="adr-input-info-text">Envie de placer des panneaux photolvtaïques chez vous ? Vérifier si c'est vrament intéressant !</p>
+                    <div class="adr-input-content">
+                        <input type=text placeholder="20, Rue de la Dodane"/>
+                    </div>
+                </div>
+            </div>
+            <button id="openForm">Obtenir mon estimation</button>
+            <div id="form">
+                <fieldset>
+                    <legend>Demande d'estimation</legend>
+                    <label for="nom">Nom <em>*</em></label> 
+                    <input id="nom"/></br>
+                    <label for="consommationAnnuelle">Consommation Annuelle (kwh) <em>*</em></label> 
+                    <input id="consommationAnnuelle" required placeholder="5 000"/></br>
+                    <label for="superficie">Superficie de votre toit <em>*</em></label> 
+                    <input id="superficie" required placeholder="1 000" pattern="[0-9]{2,5}"/>
+
+                    <button type="submit" class="btn">Mon estimation</button>
+                    <button type="button" class="btn cancel" onclick="closeForm()">Fermer</button>
+                </fieldset>
+            </div>
+        </div>
+    </body>
+
+</html>
