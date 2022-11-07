@@ -9,6 +9,11 @@
 
     --text: #D8D8D8;
     --background: #2E3033;
+
+    --title-size: 2em;
+    --emph-size: 1.85em;
+    --text-size: 1.12em;
+    --caption-size: 0.85em;
 }
 
 * {
@@ -18,21 +23,39 @@
     color: var(--text);
 }
 
+.inactive {
+    display: none;
+}
+
 body {
     background-color: var(--background);
 }
 
-#map-wrapper {
+#map-info-wrapper{
+    margin: 30px auto;
+}
+
+#map-content {
     display: flex;
     justify-content: center;
 }
 
+#selection-name{
+    text-align: center;
+    font-size: var(--emph-size);
+}
+
+#map {
+    width: 700px;
+}
+
 #map svg {
     display: block;
-    margin-top: 20px;
-    margin-bottom: 60px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 20px auto;
+}
+
+#map svg path{
+    cursor: pointer;
 }
 
 .content {
@@ -45,7 +68,7 @@ body {
     width: 10px;
     height: 500px;
     border-radius: 20px;
-    font-size: 0.85em;
+    font-size: var(--caption-size);
     
     /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#2cba00+20,a3ff00+40,fff400+60,ffa700+80,ff0000+100 */
     background: var(--excelent);
@@ -63,21 +86,57 @@ body {
 #legend .legend-title{
     position: absolute;
     top: -30px;
-    left: -27px;
-    font-size: 1.12em;
+    left: -20px;
+    font-size: var(--caption-size);
     font-weight: bold;
 }
 
 #legend .legend-top-value{
     position: absolute;
     top: 5px;
-    left: 15px;
+    right: 15px;
 }
 
 #legend .legend-bottom-value{
     position: absolute;
     bottom: 5px;
-    left: 15px;
+    right: 15px;
+}
+
+#bati path.active{
+    pointer-events: none;
+}
+
+.info-menu {
+    display: flex;
+}
+
+.menu{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.menu p{
+    pointer-events: none;
+}
+
+.info-menu{
+    position: relative;
+}
+
+.info-menu .menu-bottom-border{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 3px;
+    background-color: var(--text);
+    transition: left .57s ease-out;
 }
 
 .adr-input-box {
@@ -87,7 +146,7 @@ body {
 }
 
 .adr-input-info-text {
-    font-size: 1.12rem;
+    font-size: var(--text-size);
     text-align: center;
     margin-bottom: 20px;
 }
@@ -104,7 +163,7 @@ body {
     width: 100%;
     height: 100%;
     text-align: center;
-    font-size: 1.25em;
+    font-size: var(--text-size);
     background-color: transparent;
     border: none;
     border-radius: 25px;
@@ -116,8 +175,8 @@ body {
 
 header {
     text-align: center;
-    padding: 40px 0;
-    font-size: 2em;
+    padding: 20px 0;
+    font-size: var(--title-size);
 }
 
 #form {

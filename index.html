@@ -5,8 +5,10 @@
         <title>Voltech</title>
         <link href="./css/index.css" rel="stylesheet">
         <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://d3js.org/topojson.v1.min.js"></script>
         <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
-        <script type="text/javascript" src="./javascript/index.js"></script>
+        <script type="module" src="./javascript/index.js"></script>
+        <script type="module" src="./javascript/service.js"></script>
     </head>
 
     <body>
@@ -15,22 +17,36 @@
                 <header>
                     <h1>Voltech</h1>
                 </header>
-                <div id="map-wrapper">
-                    <div id="map"></div>
-                    <div id="legend">
-                        <span class="legend-title">potentiel</span>
-                        <span class="legend-top-value">excellent</span>
-                        <span class="legend-bottom-value">inexistant</span>
+                <div id="map-info-wrapper">
+                    <div id="map-content">
+                        <div id="legend">
+                            <span class="legend-title">potentiel</span>
+                            <span class="legend-top-value">excellent</span>
+                            <span class="legend-bottom-value">inexistant</span>
+                        </div>
+                        <div id="map"></div>
+                        <div id="info">
+                            <div class="info-menu">
+                                <div class="menu selected">
+                                    <p>Estimation Théorique</p>
+                                </div>
+                                <div class="menu">
+                                    <p>Estimation Modèle</p>
+                                </div>
+                                <span class="menu-bottom-border" style="left: 0px;"></span>
+                            </div>
+                        </div>
                     </div>
+                    <p id="selection-name">Namur</p>
                 </div>
                 <div class="adr-input-box">
-                    <p class="adr-input-info-text">Envie de placer des panneaux photolvtaïques chez vous ? Vérifier si c'est vrament intéressant !</p>
+                    <p class="adr-input-info-text">Envie de placer des panneaux photolvtaïques chez vous ? Vérifiez si c'est vraiment intéressant !</p>
                     <div class="adr-input-content">
                         <input type=text placeholder="20, Rue de la Dodane"/>
                     </div>
                 </div>
             </div>
-            <button id="openForm">Obtenir mon estimation</button>
+            <!-- <button id="openForm">Obtenir mon estimation</button>
             <div id="form">
                 <fieldset>
                     <legend>Demande d'estimation</legend>
@@ -44,7 +60,7 @@
                     <button type="submit" class="btn">Mon estimation</button>
                     <button type="button" class="btn cancel" onclick="closeForm()">Fermer</button>
                 </fieldset>
-            </div>
+            </div> -->
         </div>
     </body>
 

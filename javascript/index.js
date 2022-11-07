@@ -1,110 +1,171 @@
+import { getDataFromFile } from "./service.js";
 
+const WIDTH = 700
+const HEIGHT = 500
+let centered;
 
 window.onload = function () {
-    d3.json('./namur-thermographie-moyenne-par-bati.geojson').then((geojson) => {
 
-        //geojson.features = geojson.features.filter(x => x.properties.quart_nom === 'Cathédrale')
 
-        geojson.features.forEach(function(feature){
-            feature.geometry = turf.rewind(feature.geometry, { reverse : true});
-        })
-
-        var width = 960
-        var height = 500
-
-        color = [
-            "#FF0000",
-            "#FFA700",
-            "#FFF400",
-            "#A3FF00",
-            "#2CBA00",
-        ]
-
-        let quartiers = {
-            "Andoy": 40575.5947580645,
-            "Bouge": 37493.5982008996,
-            "Moulin à vent": 32954.2459788152,
-            "Boninne": 40550.0323974082,
-            "Cognelée": 37096.7446808511,
-            "Champion": 36545.0315934066,
-            "Dave": 32819.977245509,
-            "Daussoulx": 34439.1068493151,
-            "Flawinne": 31350.9431680774,
-            "La Leuchère": 31714.2891278375,
-            "Gelbressée": 38866.9223880597,
-            "Amée": 23333.9107282694,
-            "Velaine": 25043.8636481242,
-            "Montagne": 34693.233562316,
-            "Géronsart": 42593.6763678696,
-            "Herbatte": 20499.7464788732,
-            "La Plante": 29574.5478855721,
-            "Salzinnes": 27349.0044272275,
-            "Bomel-Heuvy": 21918.5124198718,
-            "Bas-Prés": 20805.5904605263,
-            "Trois-Piliers": 25891.789904502,
-            "Suarlée": 38530.4455958549,
-            "Vedrin": 35464.454091193,
-            "Wierde": 43113.8207171315,
-            "Belgrade": 33065.9899178491,
-            "Fonds de Malonne": 33287.7903118779,
-            "Hauts de Malonne": 37375.0862329803,
-            "Namur-Centre": 20159.6320836966,
-            "Cathédrale": 22248.0095759234,
-            "Sources": 22253.3283302064,
-            "Saint-Marc": 33032.658808933,
-            "Temploux": 38727.4152249135,
-            "Vierly": 36861.8187919463,
-            "Beez": 35095,
-            "Erpent": 43028.7147102526,
-            "Jambes-Centre": 25693.5235128617,
-            "Lives": 34615.095890411,
-            "Loyers": 37526.4142091153,
-            "Marche-les-Dames": 35262.7707129094,
-            "Célestines": 18704.467164976,
-            "Citadelle": 53283.3315899582,
-            "Naninne": 36393.4127906977,
-            "Saint-Servais": 21493.5489379425,
-            "Frizet": 39638.4786516854,
-            "Comognes": 34071.1393557423,
-            "Fooz-Wépion": 34817.1105722599
-        }
-
-        let tranches = [
-            25620.24004997244,
-            32536.01293496888,
-            39451.78581996532,
-            46367.55870496176
-        ]
-
-        geojson.features.forEach(elem => {
-            let fQuartier = elem.properties.quart_nom
-            elem.properties.color = color[color.length - 1]
-            if(fQuartier !== undefined){
-                for(let i = 0; i < tranches.length; i++){
-                    if(quartiers[fQuartier] < tranches[i]){
-                        elem.properties.color = color[i]
-                        break;
-                    }
+    [...document.getElementsByClassName('menu')].forEach(elem => {
+        elem.onclick = (e) => {
+            let selectedElem = document.getElementsByClassName('selected')[0];
+            let isFirst = selectedElem === document.getElementsByClassName('menu')[0]
+            console.log(isFirst)
+            if(isFirst && selectedElem !== e.target){
+                let menuBar = document.getElementsByClassName('menu-bottom-border')[0];
+                let leftOffset = parseInt(menuBar.style.left.match(/\d*/));
+                menuBar.style.left = `${leftOffset + 200}px`
+            }
+            else{
+                if(!isFirst && selectedElem !== e.target){
+                    let menuBar = document.getElementsByClassName('menu-bottom-border')[0];
+                    let leftOffset = parseInt(menuBar.style.left.match(/\d*/));
+                    console.log(leftOffset)
+                    menuBar.style.left = `${leftOffset - 200}px`
                 }
             }
+            selectedElem.classList.remove('selected');
+            e.target.classList.add('selected')
+        }
+    });
+
+
+
+
+
+
+    getDataFromFile('q').then(quartiersData => {
+        getDataFromFile('b').then(batiData => {
+            console.log(batiData)
+            const svg = d3.select('#map').append('svg').attr('width', WIDTH).attr('height', HEIGHT);
+            const g = svg.append('g');  
+            let group = displayMainQuart(quartiersData, g)
+            displayMainBati(batiData, group);
+
+            /* var zoom = d3.zoom()
+                .scaleExtent([1,8])
+                .on('zoom', function(){
+                    g.selectAll('path')
+                        .attr('transform', d3.zoomTransform(this));
+                });
+            
+            svg.call(zoom); */
+
+        }).catch(err => {
+            console.error(err);s
         });
+        
+    }).catch(err => {
+        console.error(err);
+    });
 
-        //geojson.features = geojson.features.filter(f => f.properties.acom_nom_m === 'FLAWINNE')
-
+    function displayMainBati(featureCollection, container){
         let projection = d3.geoMercator()
-            .fitSize([width, height], geojson)
+            .fitSize([WIDTH, HEIGHT], featureCollection)
         let path = d3.geoPath().projection(projection)
 
-        const svg = d3.select('#map').append('svg').attr('width', width).attr('height', height);
-        const g = svg.append('g').append('g')
+        const COLORS = [
+            getComputedStyle(document.documentElement).getPropertyValue('--critical'),
+            getComputedStyle(document.documentElement).getPropertyValue('--bad'),
+            getComputedStyle(document.documentElement).getPropertyValue('--medium'),
+            getComputedStyle(document.documentElement).getPropertyValue('--good'),
+            getComputedStyle(document.documentElement).getPropertyValue('--excelent'),
+        ]
 
+        const g = container.append('g').attr('id', 'bati');
         g.selectAll('path')
-            .data(geojson.features)
+            .data(featureCollection.features)
+            .enter()
+            .append('path')
+                .classed('active', true)
+                .attr('d', path)
+                .attr('fill', d => COLORS[d.properties.level])
+                .attr('data-quart', d => d.properties.quart_name)
+                
+    }
+
+    function displayMainQuart(featureCollection, container){
+        let projection = d3.geoMercator()
+            .fitSize([WIDTH, HEIGHT], featureCollection)
+        let path = d3.geoPath().projection(projection)
+
+        const g = container.append('g').attr('id', 'quart');
+        g.selectAll('path')
+            .data(featureCollection.features)
             .enter()
             .append('path')
             .attr('d', path)
-            .attr('fill', d => d.properties.color)
-    }).catch(err => console.log(err))
+            .attr('fill', 'transparent')
+            .attr('stroke', getComputedStyle(document.documentElement).getPropertyValue('--text'))
+            .on('click', function(_, d){
+                clickedQuart(d, g, path)
+            })
+        return g;
+    }
+
+    function clickedQuart(d, container, path){
+        let x, y, k;
+
+        if(d && centered !== d){
+            let centroid = path.centroid(d);
+            x = centroid[0];
+            y = centroid[1];
+            k = 4
+            centered = d;
+        }
+        else{
+            x = WIDTH / 2;
+            y = HEIGHT / 2;
+            k = 1;
+            centered = null;
+        }
+
+        container.select('#quart').selectAll('path')
+            .classed('active', centered && function(d){return d === centered})
+        
+        if(centered){
+            container.selectAll(`#bati :not(path[data-quart="${d.properties.quart_name}"])`)
+                .style('display', 'none')
+            container.selectAll(`#bati path[data-quart="${d.properties.quart_name}"]`)
+                .style('display', 'block')
+        }
+
+        container.transition()
+            .duration(1000)
+            .attr("transform", "translate(" + WIDTH / 2 + "," + HEIGHT / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+            .on('end', function(){
+                if(!centered){
+                    container.selectAll('#bati path').style('display','block')
+                }
+            })
+
+    }
+
+    function selectLocality(data, container){
+
+        let featureCollection = {type:'FeatureCollection', 'features':[data]}
+
+        let projection = d3.geoMercator()
+            .fitSize([WIDTH, HEIGHT], featureCollection)
+        let path = d3.geoPath().projection(projection)
+
+        container.selectAll('*').remove();
+        const g = container.append('g').append('g');
+
+        g.selectAll('path')
+            .data(featureCollection.features)
+            .enter()
+            .append('path')
+            .attr('d', path)
+            .attr('fill', 'transparent')
+            .attr('stroke', getComputedStyle(document.documentElement).getPropertyValue('--text'))
+
+        console.log(data)           
+        document.getElementById('selection-name').innerHTML = data.properties.quart_name;
+    }
+    
+
 
     /*
     .attr('stroke', d => {
