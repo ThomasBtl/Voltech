@@ -58,6 +58,11 @@ body {
     cursor: pointer;
 }
 
+.info-wrapper{
+    margin-top: 20px;
+    border: 1px solid black;
+}
+
 .content {
     max-width: 1920px;
     margin: 0 auto;
