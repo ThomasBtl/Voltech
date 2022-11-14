@@ -1,3 +1,4 @@
+import { INFO } from "./info.js";
 import { getDataFromFile } from "./service.js";
 
 export const MAP = (function () {
@@ -122,6 +123,9 @@ export const MAP = (function () {
             .attr('d', path)
             .attr('fill', d => COLORS.colorLevel[d.properties.level])
             .attr('data-quart', d => d.properties.quart_name)
+            .on('click', (_, d) => {
+                console.log(d)
+            })
 
     }
 
@@ -162,11 +166,13 @@ export const MAP = (function () {
                 .style('display', 'none')
             container.selectAll(`path[data-quart="${d.properties.quart_name}"]`)
                 .style('display', 'block')
+                .style('pointer-events', 'auto')
             quartName = d.properties.quart_name
+            districtContainer.selectAll('path').on('mouseover', null)
+            INFO.displayDistrictInfo(d)
         }
         
         document.getElementById('selection-name').innerHTML = quartName;
-
 
         container.transition()
             .duration(1000)
@@ -176,6 +182,14 @@ export const MAP = (function () {
                 if (!centered) {
                     container.selectAll('#bati path').style('display', 'block')
                     container.selectAll('#district path').style('display', 'block')
+                    INFO.displayQuartRanking(districtDataset)
+                    districtContainer.selectAll('path')
+                        .on('mouseover', function () {
+                            d3.select(this).transition()
+                                .duration('50')
+                                .attr('fill',  COLORS.border)
+                                .style('opacity', '0.3')
+                        })
                 }
             })
 
@@ -184,11 +198,11 @@ export const MAP = (function () {
     function displayGroup(type){
         if(type === TYPES.DISTRICT){
             removeBuilding();
-            displayColorfulDistrict()
+            displayColorfulDistrict();
         }
         else{
             if(type === TYPES.BUILDING){
-                displayTernDistrict()
+                displayTernDistrict();
                 displayBuilding();
             }
         }
@@ -203,22 +217,22 @@ export const MAP = (function () {
             try {
                 await init();
 
-                __setUpProjection()
+                __setUpProjection();
 
                 // Set up the map container
                 container = svg.append('g');
 
-                districtContainer = displayDistricts()
+                districtContainer = displayDistricts(districtDataset);
                 displayColorfulDistrict();
                 // displayBuilding(buildingContainer);
 
                 return new Promise((resolve, _) => {
-                    resolve([districtDataset, buildingDataset])
+                    resolve([districtDataset, buildingDataset]);
                 })
 
             }
             catch (e) {
-                console.error(e)
+                console.error(e);
             }
         },
         displayGroup: displayGroup,

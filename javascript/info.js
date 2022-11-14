@@ -14,9 +14,13 @@ export const INFO = (function(){
         ],
     }
 
+    function resetInfo(){
+        infoWrapper.innerHTML = '';
+    }
+
     return {
         displayQuartRanking : function(districts){
-            console.log(MAP.path())
+            resetInfo()
             for(let district of districts.features){
                 let mainElem = document.createElement('div');
                 mainElem.classList.add('power-ranking-elem')
@@ -52,8 +56,26 @@ export const INFO = (function(){
                 infoWrapper.appendChild(mainElem)
             }
         },
-        resetInfo : function(){
-            infoWrapper.innerHTML = '';
+        resetInfo : resetInfo,
+        displayDistrictInfo : function(district){
+            console.log(district)
+
+            const mainElem = document.createElement('div');
+
+            const totalProd = document.createElement('p');
+            totalProd.innerHTML = `potentiel : ${district.properties.quart_prod}kWh/an`
+            const rankingDistrict = document.createElement('p');
+            rankingDistrict.innerHTML = `ranking : ${district.properties.ranking}`
+            const co2totalsave = document.createElement('p');
+            co2totalsave.innerHTML = `ranking : ${district.properties.co2save}`
+        
+            mainElem.appendChild(totalProd)
+            mainElem.appendChild(rankingDistrict)
+            mainElem.appendChild(co2totalsave)
+
+            resetInfo()
+
+            infoWrapper.appendChild(mainElem)        
         }
 
     }
