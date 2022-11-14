@@ -20,7 +20,6 @@
     padding: 0;
     margin: 0;
     font-family: "Raleway";
-    color: var(--text);
 }
 
 .inactive {
@@ -29,6 +28,7 @@
 
 body {
     background-color: var(--background);
+    color: var(--text);
 }
 
 #map-info-wrapper{
@@ -60,7 +60,12 @@ body {
 
 .info-wrapper{
     margin-top: 20px;
-    border: 1px solid black;
+    max-height: 450px;
+    overflow-y: hidden;
+}
+
+.info-wrapper:hover{
+    overflow-y: scroll;
 }
 
 .content {
@@ -176,6 +181,31 @@ body {
 
 .adr-input-content input:focus {
     outline: none;
+}
+
+.power-ranking-elem{
+    padding: 5px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    transition: background-color .2s;
+}
+
+.power-ranking-elem:hover {
+    background-color: var(--text);
+    color: var(--background);
+    transition: background-color .2s;
+}
+
+.ranking-number{
+    border: 1px solid var(--text);
+    width: 30px;
+    height: 30px;
+    border-radius: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 header {
