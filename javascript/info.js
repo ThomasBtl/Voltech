@@ -21,19 +21,19 @@ export const INFO = (function(){
                 let mainElem = document.createElement('div');
                 mainElem.classList.add('power-ranking-elem')
                 mainElem.onmouseover = () => {
-                    const mapDistrict = d3.select(`path[data-quart="${district.properties.quart_name}"]`)
+                    const mapDistrict = d3.select(`g[data-quart="${district.properties.quart_name}"]`)
                     mapDistrict.transition()
                         .duration('50')
                         .style('opacity', '0.75')
                 }
                 mainElem.onmouseout = () => {
-                    const mapDistrict = d3.select(`path[data-quart="${district.properties.quart_name}"]`)
+                    const mapDistrict = d3.select(`g[data-quart="${district.properties.quart_name}"]`)
                     mapDistrict.transition()
                         .duration('50')
                         .style('opacity', '1')
                 }
                 mainElem.onclick = () => {
-                    MAP.clickDistrict(district, d3.select('#district'), MAP.path())
+                    MAP.clickDistrict(district, MAP.path())
                 }
 
 

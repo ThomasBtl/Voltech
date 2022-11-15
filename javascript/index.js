@@ -40,7 +40,7 @@ window.onload = function () {
     });
 
     MAP.displayMap().then(([districtDataset, buildingDataset]) => {
-        INFO.displayQuartRanking(districtDataset);
+        INFO.displayQuartRanking(MAP.sortDistrictByRanking());
     });
 
 }
