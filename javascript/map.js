@@ -274,11 +274,12 @@ export const MAP = (function () {
                 .style('display', 'block')
                 .style('pointer-events', 'auto')
             quartName = d.properties.quart_name
-            districtContainer.selectAll('path').on('mouseover', null)
+            //districtContainer.selectAll('path').on('mouseover', null)
             INFO.displayDistrictInfo(d)
         }
         
         document.getElementById('selection-name').innerHTML = quartName;
+
 
         container.transition()
             .duration(1000)
