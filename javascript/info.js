@@ -58,19 +58,21 @@ export const INFO = (function(){
         },
         resetInfo : resetInfo,
         displayDistrictInfo : function(district){
-            console.log(district)
 
             const mainElem = document.createElement('div');
 
             const totalProd = document.createElement('p');
             totalProd.innerHTML = `potentiel : ${district.properties.quart_prod}kWh/an`
+            const rankingVisuElem = document.createElement('div');
+            rankingVisuElem.classList.add('district-ranking-level');
             const rankingDistrict = document.createElement('p');
-            rankingDistrict.innerHTML = `ranking : ${district.properties.ranking}`
+            rankingDistrict.innerHTML = `ranking : ${district.properties.ranking}`;
             const co2totalsave = document.createElement('p');
-            co2totalsave.innerHTML = `ranking : ${district.properties.co2save}`
+            co2totalsave.innerHTML = `CO2 économisé : ${district.properties.co2save}`
         
             mainElem.appendChild(totalProd)
             mainElem.appendChild(rankingDistrict)
+            mainElem.appendChild(rankingVisuElem)
             mainElem.appendChild(co2totalsave)
 
             resetInfo()

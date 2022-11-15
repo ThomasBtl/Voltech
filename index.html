@@ -1,54 +1,71 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <title>Voltech</title>
-        <link href="./css/index.css" rel="stylesheet">
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script src="https://d3js.org/topojson.v1.min.js"></script>
-        <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
-        <script type="module" src="./javascript/index.js"></script>
-        <script type="module" src="./javascript/service.js"></script>
-    </head>
+<head>
+    <title>Voltech</title>
+    <link href="./css/index.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script type="module" src="./javascript/index.js"></script>
+    <script type="module" src="./javascript/service.js"></script>
+</head>
 
-    <body>
-        <div id="main-page">
-            <div class="content">
-                <header>
-                    <h1>Voltech</h1>
-                </header>
-                <div id="map-info-wrapper">
-                    <div id="map-content">
-                        <div id="legend">
-                            <span class="legend-title">potentiel</span>
-                            <span class="legend-top-value">excellent</span>
-                            <span class="legend-bottom-value">inexistant</span>
-                        </div>
-                        <div id="map"></div>
-                        <div id="info">
-                            <div class="info-menu">
-                                <div class="menu selected" data-type="quartier">
-                                    <p>Visualiastion par quartier</p>
-                                </div>
-                                <div class="menu" data-type="batiment">
-                                    <p>Visualisation par bâtiment</p>
-                                </div>
-                                <span class="menu-bottom-border" style="left: 0px;"></span>
-                            </div>
-                            <div class="info-wrapper">
-                            </div>
+<body>
+    <div id="main-page">
+        <div class="content">
+            <header>
+                <h1>Voltech</h1>
+            </header>
+            <div id="map-info-wrapper">
+                <div id="map-content">
+                    <div id="legend">
+                        <span class="legend-title">potentiel</span>
+                        <span class="legend-top-value">excellent</span>
+                        <span class="legend-bottom-value">inexistant</span>
+                    </div>
+                    <div id="map">
+                        <div id="map-style-selector">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                class="map-icon-selector current-icon" viewBox="0 0 16 16">
+                                <path
+                                    d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                class="map-icon-selector" viewBox="0 0 16 16">
+                                <path
+                                    d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1ZM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z" />
+                                <path
+                                    d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1Zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3V1Z" />
+                            </svg>
                         </div>
                     </div>
-                    <p id="selection-name">Namur</p>
+                    <div id="info">
+                        <!-- <div class="info-menu">
+                            <div class="menu selected" data-type="quartier">
+                                <p>Visualiastion par quartier</p>
+                            </div>
+                            <div class="menu" data-type="batiment">
+                                <p>Visualisation par bâtiment</p>
+                            </div>
+                            <span class="menu-bottom-border" style="left: 0px;"></span>
+                        </div> -->
+                        <h2>Informations</h2>
+                        <div class="info-wrapper">
+                        </div>
+                    </div>
                 </div>
-                <div class="adr-input-box">
-                    <p class="adr-input-info-text">Envie de placer des panneaux photolvtaïques chez vous ? Vérifiez si c'est vraiment intéressant !</p>
-                    <div class="adr-input-content">
-                        <input type=text placeholder="20, Rue de la Dodane"/>
-                    </div>
+                <p id="selection-name">Namur</p>
+            </div>
+            <div class="adr-input-box">
+                <p class="adr-input-info-text">Envie de placer des panneaux photolvtaïques chez vous ? Vérifiez si c'est
+                    vraiment intéressant !</p>
+                <div class="adr-input-content">
+                    <input type=text placeholder="20, Rue de la Dodane" />
                 </div>
             </div>
-            <!-- <button id="openForm">Obtenir mon estimation</button>
+        </div>
+        <!-- <button id="openForm">Obtenir mon estimation</button>
             <div id="form">
                 <fieldset>
                     <legend>Demande d'estimation</legend>
@@ -63,7 +80,7 @@
                     <button type="button" class="btn cancel" onclick="closeForm()">Fermer</button>
                 </fieldset>
             </div> -->
-        </div>
-    </body>
+    </div>
+</body>
 
 </html>

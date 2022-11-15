@@ -46,6 +46,7 @@ body {
 }
 
 #map {
+    position: relative;
     width: 700px;
 }
 
@@ -58,8 +59,40 @@ body {
     cursor: pointer;
 }
 
+#map-style-selector {
+    position: absolute;
+    right: 60px;
+    display: flex;
+    column-gap: 10px;
+}
+
+#map-style-selector svg {
+    fill: var(--text);
+    cursor: pointer;
+}
+
+#map-style-selector svg {
+    opacity: 0.3;
+    transition: opacity .5s;
+}
+
+.current-icon{
+    opacity: 1 !important;
+}
+
+#map-style-selector svg:hover {
+    opacity: 1;
+    transition: opacity .5s;
+}
+
+#info {
+    width: 400px;
+}
+
+
 .info-wrapper{
     margin-top: 20px;
+    width: 400px;
     max-height: 420px;
     overflow-y: hidden;
 }
@@ -119,6 +152,13 @@ body {
 
 .info-menu {
     display: flex;
+}
+
+.district-ranking-level{
+    width: 230px;
+    height: 5px;
+    background: rgb(255,0,0);
+    background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(255,167,0,1) 25%, rgba(255,244,0,1) 50%, rgba(163,255,0,1) 75%, rgba(44,186,0,1) 100%);
 }
 
 .menu{
