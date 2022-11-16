@@ -53,6 +53,8 @@ body {
 #map svg {
     display: block;
     margin: 20px auto;
+    background-image: url("../assets/buildings.png");
+    background-repeat: no-repeat;
 }
 
 #map svg path{

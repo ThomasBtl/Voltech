@@ -200,7 +200,8 @@ export const MAP = (function () {
     }
 
     function displayTernDistrict(){
-        const districtPaths = districtContainer.selectAll('path')
+
+        const districtPaths = container.selectAll('path')
             .attr('fill', 'transparent')
 
         // Add districts events
@@ -219,8 +220,35 @@ export const MAP = (function () {
             });
     }
 
+    function displayBuildingDistrict(districtName){
+        // Clear all building
+        d3.selectAll('.buildings-group').remove();
+
+        // Display building of districtName
+        const districtContainer = d3.select(`#${districtName.replaceAll(' ', '-')}`)
+
+        const filteredBuildings = {
+            'type' : 'FeatureCollection',
+            features : buildingDataset.features.filter(b => b.properties.quart_name === districtName)
+        };
+
+        const g = districtContainer.append('g').classed('buildings-group', true)
+        console.log(g)
+        g.selectAll('path')
+            .data(filteredBuildings.features)
+            .enter()
+            .append('path')
+            .classed('active', true)
+            .attr('d', path)
+            .attr('fill', d => COLORS.colorLevel[d.properties.level])
+            .attr('data-quart', d => d.properties.quart_name)
+            .on('click', (_, d) => {
+                console.log(d)
+            })
+    }
+
     function displayBuilding() {
-        const g = districtContainer.append('g').attr('id', 'bati');
+        const g = container.append('g').attr('id', 'bati');
         g.selectAll('path')
             .data(buildingDataset.features)
             .enter()
@@ -236,7 +264,7 @@ export const MAP = (function () {
     }
 
     function removeBuilding(){
-        d3.select('#bati').remove();
+        d3.select('.buildings-group').remove();
     }
 
     function __setUpProjection() {
@@ -274,7 +302,7 @@ export const MAP = (function () {
                 .style('display', 'block')
                 .style('pointer-events', 'auto')
             quartName = d.properties.quart_name
-            //districtContainer.selectAll('path').on('mouseover', null)
+            displayBuildingDistrict(quartName)
             INFO.displayDistrictInfo(d)
         }
         
@@ -288,6 +316,7 @@ export const MAP = (function () {
                 /* container.selectAll('#bati').style('display', 'block') */
                 if (!centered) {
                     /* container.selectAll('#bati path').style('display', 'block') */
+                    removeBuilding()
                     container.selectAll('g')
                         .style('display', 'block')
                         .selectAll('path')
@@ -324,10 +353,13 @@ export const MAP = (function () {
                 container = svg.append('g');
 
                 districtContainer = displayDistricts()
-                displayDistrictColor().then(() => {
+                addDistrictEvent()
+                displayBuildingDistrict('Wierde')
+                /* displayDistrictColor().then(() => {
                     addDistrictEvent();
                 });
-                // displayBuilding(buildingContainer);
+                 */
+                //displayBuilding();
 
                 return new Promise((resolve, _) => {
                     resolve([districtDataset, buildingDataset]);
@@ -338,6 +370,7 @@ export const MAP = (function () {
                 console.error(e);
             }
         },
+        displayBuildings : displayBuilding,
         displayGroup: displayGroup,
         clickDistrict : clickDistrict,
         sortDistrictByRanking : sortDistrictByRanking
