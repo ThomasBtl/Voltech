@@ -5,11 +5,9 @@ window.onload = function () {
 
     let displayQuart = true;
 
-
     // Setting up the right side menu
     [...document.getElementsByClassName('map-icon-selector')].forEach(elem => {
         elem.onclick = (e) => {
-
             function getSiblings(n){
                 let siblings = []
                 let parent = n.parentNode
@@ -27,12 +25,20 @@ window.onload = function () {
             for(let sibling of getSiblings(target)){
                 sibling.classList.toggle('current-icon')
             }
+
+            let displayType = target.dataset.type;
+            if(displayType === 'district'){
+                MAP.displayGroup(MAP.types.DISTRICT)
+            }
+            else{
+                MAP.displayGroup(MAP.types.BUILDING)
+            }
         }
     });
 
 
     MAP.displayMap().then(([districtDataset, buildingDataset]) => {
-        INFO.displayQuartRanking(MAP.sortDistrictByRanking());
+        INFO.displayQuartRanking(MAP.sortDistrict('ranking'));
     });
 
 }

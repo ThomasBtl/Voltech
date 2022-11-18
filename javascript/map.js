@@ -3,8 +3,11 @@ import { getDataFromFile } from "./service.js";
 
 export const MAP = (function () {
 
+    //#region constante
+
     const WIDTH = 700
     const HEIGHT = 500
+
     const COLORS = {
         colorLevel: [
             getComputedStyle(document.documentElement).getPropertyValue('--critical'),
@@ -21,34 +24,33 @@ export const MAP = (function () {
         BUILDING : 'buildings'
     };
 
-    const svg = d3.select('#map').append('svg').attr('width', WIDTH).attr('height', HEIGHT)
+    //#endregion
+
+    const svg = d3.select('#map').append('svg')
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
+        .classed('map-svg', true)
 
     let districtDataset;
     let buildingDataset;
-    let buildingByDistrictDataset;
     let container;  // The main container for the map
     let districtContainer;
     let projection;
     let centered;
     let path;
+    let currentZoomedDistrict;
+    let displayedMode;
 
+    /**
+     * Gather the data to display. Initialize this.districtDataset and this.buildingDataset.
+     * @returns A Promise that resolve if the data has been fetch without any problem, and reject if a problem occured during the fetching.
+     */
     function init() {
         return new Promise((resolve, reject) => {
             getDataFromFile('q').then(districts => {
                 districtDataset = districts;
                 getDataFromFile('b').then(buildings => {
-                    // Arrange buildings in order to have a set of building for each districts
-                    let buildingByDistrict = {}
-                    for(let b of buildings.features){
-                        if(!buildingByDistrict[b.properties.quart_name]){
-                            buildingByDistrict[b.properties.quart_name] = []
-                        }
-                        buildingByDistrict[b.properties.quart_name].push(b)
-                    }
-
                     buildingDataset = buildings;
-                    buildingByDistrictDataset = buildingByDistrict
-
                     resolve();
                 }).catch(e => {
                     console.error(e);
@@ -74,7 +76,6 @@ export const MAP = (function () {
                 .attr('d', path)
                 .attr('fill', 'transparent')
                 .attr('stroke', COLORS.border)
-                
         }
     }
 
@@ -95,11 +96,18 @@ export const MAP = (function () {
                 });
     }
 
-
+    function removeDistrictEvent(){
+        container.selectAll('.district-elem')
+                .on('click', null)
+                .on('mouseover', null)
+                .on('mouseout', null);
+    }
+        
     async function displayDistrictColor(){
+        displayedMode = TYPES.DISTRICT;
         return new Promise((resolve, _) => {
             let n = 0;
-            let animDuration = 800;
+            let animDuration = 600;
             let sortedDistrict = sortDistrictByLongitude()
             for(let district of sortedDistrict.features){
                 setTimeout(() => {
@@ -108,7 +116,7 @@ export const MAP = (function () {
                         .transition()
                             .duration(animDuration)
                             .attr('fill', d => COLORS.colorLevel[d.properties.level - 1])
-                }, n * 15)
+                }, n * 10)
                 n++
             }
 
@@ -121,6 +129,7 @@ export const MAP = (function () {
     }
 
     async function removeDistrictColor(){
+        displayedMode = TYPES.BUILDING;
         return new Promise((resolve, _) => {
             let sortedDistrict = sortDistrictByLongitude()
             for(let n = sortedDistrict.features.length - 1; n >= 0; n--){
@@ -128,14 +137,56 @@ export const MAP = (function () {
                     const name = sortedDistrict.features[n].properties.quart_name; 
                     container.select(`#${name.replaceAll(' ', '-')}`).selectAll('.district-elem')
                         .transition()
-                            .duration(1000)
+                            .duration(600)
                             .attr('fill', 'transparent')
                     if(n === 0){
                         resolve()
                     }
-                }, (n - 45) * (-15))
+                }, (n - 45) * (-10))
             }
         })
+    }
+
+    function sortDistrict(by, reverse=false){
+
+        // Check if by is a valid key
+        if(!districtDataset.features[0].properties[by]){
+            console.error(`${by} is not a valid key`)
+        }
+
+        let sortedDistricts = {
+            'type' : 'FeatureCollection',
+            features : []
+        }
+
+        for(let district of districtDataset.features){
+            // sortedDistrict.features is empty
+            if(sortedDistricts.features.length === 0){
+                sortedDistricts.features.push(district)
+            }
+            else{
+                // Find district index in sortedDistrict
+                for(var i = 0; i < sortedDistricts.features.length; i++){
+                    const a = district.properties[by];
+                    const b = sortedDistricts.features[i].properties[by];
+                    // asc sort
+                    if(a < b){
+                        sortedDistricts.features.splice(i, 0, district)
+                        break; // index has been found we can stop the iteration
+                    }
+                }
+                // If index has not been found, add district as the last sortedDistricts
+                if(i === sortedDistricts.features.length){
+                    sortedDistricts.features.push(district)
+                }
+            }
+        }
+
+        if(reverse){
+            sortedDistricts.features.reverse()
+        }
+
+        return sortedDistricts
     }
 
     /**
@@ -170,57 +221,7 @@ export const MAP = (function () {
         return sortedDistricts
     }
 
-    function sortDistrictByRanking(){
-        let sortedDistricts = {
-            'type' : 'FeatureCollection',
-            features : []
-        }
-
-        for(let district of districtDataset.features){
-            // sortedDistrict.features is empty
-            if(sortedDistricts.features.length === 0){
-                sortedDistricts.features.push(district)
-            }
-            else{
-                for(var i = 0; i < sortedDistricts.features.length; i++){
-                    const districtToInsertRanking = district.properties.ranking;
-                    const currentDistrictRanking = sortedDistricts.features[i].properties.ranking;
-                    if(districtToInsertRanking < currentDistrictRanking){
-                        sortedDistricts.features.splice(i, 0, district)
-                        break;
-                    }
-                }
-                if(i === sortedDistricts.features.length){
-                    sortedDistricts.features.push(district)
-                }
-            }
-        }
-
-        return sortedDistricts
-    }
-
-    function displayTernDistrict(){
-
-        const districtPaths = container.selectAll('path')
-            .attr('fill', 'transparent')
-
-        // Add districts events
-        districtPaths
-            .on('mouseover', function () {
-                d3.select(this).transition()
-                    .duration('50')
-                    .attr('fill',  COLORS.border)
-                    .style('opacity', '0.3')
-            })
-            .on('mouseout', function () {
-                d3.select(this).transition()
-                    .duration('50')
-                    .attr('fill', 'transparent')
-                    .style('opacity', '1')
-            });
-    }
-
-    function displayBuildingDistrict(districtName){
+    function displayDistrictBuilding(districtName){
         // Clear all building
         d3.selectAll('.buildings-group').remove();
 
@@ -301,9 +302,16 @@ export const MAP = (function () {
             container.selectAll(`g[data-quart="${d.properties.quart_name}"] .district-elem`)
                 .style('display', 'block')
                 .style('pointer-events', 'auto')
+            currentZoomedDistrict = d
             quartName = d.properties.quart_name
-            displayBuildingDistrict(quartName)
+            if(displayedMode === TYPES.BUILDING){
+                displayDistrictBuilding(quartName)
+            }
+            removeBuildingsBackground();
             INFO.displayDistrictInfo(d)
+        }
+        else{
+            currentZoomedDistrict = null;
         }
         
         document.getElementById('selection-name').innerHTML = quartName;
@@ -316,7 +324,9 @@ export const MAP = (function () {
                 /* container.selectAll('#bati').style('display', 'block') */
                 if (!centered) {
                     /* container.selectAll('#bati path').style('display', 'block') */
-                    removeBuilding()
+                    removeBuilding();
+                    displayBuildingBackground();
+                    INFO.displayQuartRanking(sortDistrict('ranking'))
                     container.selectAll('g')
                         .style('display', 'block')
                         .selectAll('path')
@@ -325,15 +335,34 @@ export const MAP = (function () {
             })
     }
 
+    function removeBuildingsBackground(){
+        document.getElementsByClassName('map-svg')[0].classList.remove('buildings')
+    }
+
+    function displayBuildingBackground(){
+        document.getElementsByClassName('map-svg')[0].classList.add('buildings')
+    }
+
     function displayGroup(type){
         if(type === TYPES.DISTRICT){
-            removeBuilding();
-            displayDistrictColor()
+            removeDistrictEvent();
+            removeBuilding(); // If map is centered, the displayed building need to be removed too
+            displayDistrictColor().then(() => {
+                addDistrictEvent()
+                removeBuildingsBackground();
+            });
         }
         else{
             if(type === TYPES.BUILDING){
-                displayTernDistrict();
-                displayBuilding();
+                // Do not display the building background if the map is zoomed in
+                if(!centered){
+                    displayBuildingBackground();
+                }
+                removeDistrictColor().then(() => {
+                    if(centered){
+                        displayDistrictBuilding(currentZoomedDistrict.properties.quart_name)
+                    }
+                });
             }
         }
     }
@@ -351,10 +380,10 @@ export const MAP = (function () {
 
                 // Set up the map container
                 container = svg.append('g');
+                svg.node().classList.add('buildings')
 
                 districtContainer = displayDistricts()
                 addDistrictEvent()
-                displayBuildingDistrict('Wierde')
                 /* displayDistrictColor().then(() => {
                     addDistrictEvent();
                 });
@@ -373,7 +402,7 @@ export const MAP = (function () {
         displayBuildings : displayBuilding,
         displayGroup: displayGroup,
         clickDistrict : clickDistrict,
-        sortDistrictByRanking : sortDistrictByRanking
+        sortDistrict : sortDistrict
     }
 })();
 

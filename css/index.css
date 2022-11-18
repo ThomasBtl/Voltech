@@ -53,6 +53,12 @@ body {
 #map svg {
     display: block;
     margin: 20px auto;
+    background-repeat: no-repeat;
+}
+
+#map svg.buildings {
+    display: block;
+    margin: 20px auto;
     background-image: url("../assets/buildings.png");
     background-repeat: no-repeat;
 }
@@ -73,6 +79,10 @@ body {
     cursor: pointer;
 }
 
+#map-style-selector svg path{
+    pointer-events: none;
+}
+
 #map-style-selector svg {
     opacity: 0.3;
     transition: opacity .5s;
@@ -90,7 +100,6 @@ body {
 #info {
     width: 400px;
 }
-
 
 .info-wrapper{
     margin-top: 20px;
@@ -208,7 +217,7 @@ body {
     width: 80%;
     height: 65px;
     border: 1px solid var(--text);
-    border-radius: 25px;
+    border-radius: 15px;
 }
 
 .adr-input-content input {
@@ -219,6 +228,7 @@ body {
     background-color: transparent;
     border: none;
     border-radius: 25px;
+    color: var(--text);
 }
 
 .adr-input-content input:focus {
