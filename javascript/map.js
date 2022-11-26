@@ -511,6 +511,3 @@ export const MAP = (function () {
         sortDistrict : sortDistrict
     }
 })();
-
-
-

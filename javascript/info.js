@@ -1,8 +1,18 @@
 import { MAP } from "./map.js";
+import model from '../model_result.json' assert {type: 'json'};
 
 export const INFO = (function () {
 
+    let userConso = 19000;
+    let userRoofSuperficy = 100;
+
     const infoWrapper = document.getElementsByClassName('info-wrapper')[0];
+
+    const KWH_PRICE = 0.3377;
+    const KWH_M2 = 110;
+    const MODEL_PROD = parseFloat(model.production).toFixed(2)
+    const ELECT_PERCENT = 0.17
+    const PANEL_SIZE = 2
 
     const COLORS = {
         colorLevel: [
@@ -32,6 +42,13 @@ export const INFO = (function () {
         infoWrapper.innerHTML = `<div id="info-graph"></div>`;
     }
 
+    function resetView(){
+        let view = document.querySelector('.info-view')
+        if(view){
+            view.remove();
+        }
+    }
+
     function getPowerRankingElement(ranking, level) {
         let powerRanking = document.createElement('div');
         powerRanking.innerHTML = `<p>${ranking}</p>`;
@@ -51,7 +68,11 @@ export const INFO = (function () {
         const content = document.createElement('div');
         content.classList.add('content-info', type)
         const contentValue = document.createElement('p');
-        contentValue.innerHTML = `${value} ${unit}`;
+        if(type === 'amortization' && value < 0){
+            value = 'Jamais';
+            unit = '';
+        }
+        contentValue.innerHTML = `<span class='box-value'>${value}</span> ${unit}`;
         if(districtName !== ''){
             const contentCompVersion = document.createElement('button');
             contentCompVersion.onclick = () => {
@@ -118,8 +139,6 @@ export const INFO = (function () {
                 .style("text-anchor", "start")
                 .style('display', 'none');
 
-
-
         const y = d3.scaleLinear()
             .domain([Math.min(...data.y) - 3, Math.max(...data.y) + 3])
             .range([height, 0])
@@ -171,7 +190,172 @@ export const INFO = (function () {
         return infoGraphWrapper;
     }
 
+    function getAmortization(nPanel, pot, conso){
+        let cout_installation = getPosePrice(nPanel)
+        let economie = (pot - conso) * KWH_PRICE
+        return Math.ceil(cout_installation / economie)
+    }
+
+    function getPosePrice(nPanel){
+        let tarif_prosumer = ((300*nPanel)/1000)*78.62
+        let taxe_first_year = tarif_prosumer - ((tarif_prosumer / 100)*54.27)
+        return parseFloat(300*nPanel + 1500 + taxe_first_year).toFixed(2)
+    }
+
+    function theoView(building){
+
+        resetView()
+
+        const view = document.createElement('div');
+        view.classList.add('info-view')
+
+        const potentialSection = document.createElement('div');
+        const ecologySection = document.createElement('div');
+        const priceSection = document.createElement('div');
+        const amortizationSection = document.createElement('div');
+
+        // Pot box
+        const contentValueWrapper = document.createElement('div')
+        contentValueWrapper.classList.add('content-value-wrapper');
+
+        const potentialValue = parseFloat(building.properties.annual_prod).toFixed(2);
+        const [titlePot, boxPot] = createInfoBox('Potentiel généré', potentialValue, 'kWh/an', 'solar', '')
+
+        potentialSection.appendChild(titlePot)
+        potentialSection.appendChild(boxPot)
+
+        // Eco Box
+        const ecoValue = parseFloat(building.properties.spare_co2).toFixed(2);
+        const [titleEco, boxEco] = createInfoBox('CO2 économisé', ecoValue, 'CO2/an', 'eco', '')
+
+        ecologySection.appendChild(titleEco)
+        ecologySection.appendChild(boxEco)
+
+        // Price box
+        const priceValue = getPosePrice(building.properties.roof_superficy / PANEL_SIZE)
+        const [titlePrix, boxPrice] = createInfoBox('Prix de la pose', priceValue, '€', 'price', '')
+
+        priceSection.appendChild(titlePrix)
+        priceSection.appendChild(boxPrice)
+
+        // amortization box
+        let nbPanels = Math.floor(building.properties.roof_superficy / 1.5)
+        const amortizationValue = getAmortization(nbPanels, potentialValue, (KWH_M2 * building.properties.roof_superficy)*ELECT_PERCENT)
+        const [titleamortization, boxamortization] = createInfoBox('Amorti dans ±', amortizationValue, 'an(s)', 'amortization', '')
+
+        amortizationSection.appendChild(titleamortization)
+        amortizationSection.appendChild(boxamortization)
+
+        
+        contentValueWrapper.appendChild(potentialSection)
+        contentValueWrapper.appendChild(ecologySection)
+        contentValueWrapper.appendChild(priceSection)
+        contentValueWrapper.appendChild(amortizationSection)
+
+        view.appendChild(contentValueWrapper)
+        return view
+    }
+
+    function modelView(building){
+
+        resetView()
+
+        const view = document.createElement('div');
+        view.classList.add('info-view')
+
+        const potentialSection = document.createElement('div');
+        const ecologySection = document.createElement('div');
+        const priceSection = document.createElement('div');
+        const amortizationSection = document.createElement('div');
+
+        // Pot box
+        const contentValueWrapper = document.createElement('div')
+        contentValueWrapper.classList.add('content-value-wrapper');
+
+        const potentialValue = 0;
+        const [titlePot, boxPot] = createInfoBox('Potentiel généré', potentialValue, 'kWh/an', 'solar', '')
+
+        potentialSection.appendChild(titlePot)
+        potentialSection.appendChild(boxPot)
+
+        // Price box
+        const priceValue = 0;
+        const [titlePrix, boxPrice] = createInfoBox('Prix de la pose', priceValue, '€', 'price', '')
+
+        priceSection.appendChild(titlePrix)
+        priceSection.appendChild(boxPrice)
+
+        // amortization box
+        const amortizationValue = -1;
+        const [titleamortization, boxamortization] = createInfoBox('Amorti dans', amortizationValue, 'an(s)', 'amortization', '')
+
+        amortizationSection.appendChild(titleamortization)
+        amortizationSection.appendChild(boxamortization)
+
+        // Increase number of solar pannel
+        const nbPanelSelection = document.createElement('div');
+        nbPanelSelection.classList.add('nb-panels-selection')
+        const nbPanels = document.createElement('input');
+        const nbPanelsLabel = document.createElement('label')
+        nbPanels.type = 'number';
+        nbPanels.id = 'nbPanels';
+        nbPanelsLabel.for = 'nbPanels'
+        nbPanelsLabel.innerHTML = 'nombre de panneaux'
+        nbPanels.value = 0;
+       
+        nbPanels.onchange = (e) => {
+            let newNbPanel = e.target.value;
+
+            if(newNbPanel < 0){
+                e.target.value = 0;
+                newNbPanel = 0
+            }
+
+            const maxPanel = Math.floor(userRoofSuperficy)
+            if(newNbPanel >= maxPanel){
+                e.target.value = maxPanel;
+                newNbPanel = maxPanel
+            }
+            
+
+            boxPot.querySelector('.box-value').innerHTML = parseFloat(newNbPanel * MODEL_PROD).toFixed(2);
+            boxPrice.querySelector('.box-value').innerHTML = getPosePrice(newNbPanel)
+
+            let amortizationValue = getAmortization(newNbPanel, newNbPanel * MODEL_PROD, userConso)
+            if(amortizationValue < 0){
+                amortizationValue = 'jamais'
+            }
+            else{
+                amortizationValue = `${amortizationValue} an(s)`
+            }
+            boxamortization.querySelector('.box-value').innerHTML = amortizationValue
+        
+        }
+
+        nbPanelSelection.appendChild(nbPanelsLabel)
+        nbPanelSelection.appendChild(nbPanels)
+        
+        contentValueWrapper.appendChild(potentialSection)
+        contentValueWrapper.appendChild(ecologySection)
+        contentValueWrapper.appendChild(priceSection)
+        contentValueWrapper.appendChild(amortizationSection)
+
+        view.appendChild(nbPanelSelection)
+        view.appendChild(contentValueWrapper)
+
+        return view
+        
+    }
+
     return {
+        setConso: function(c){
+            userConso = c;
+        },
+        setRoofSuperficy: function(s){
+            userRoofSuperficy = s;
+        },
+        conso: userConso,
+        superficy: userRoofSuperficy,
         displayQuartRanking: function (districts) {
             resetInfo()
             for (let district of districts.features) {
@@ -268,59 +452,29 @@ export const INFO = (function () {
 
             resetInfo();
 
-            const potentialSection = document.createElement('div');
-            const ecologySection = document.createElement('div');
-            const priceSection = document.createElement('div');
-            const amortizationSection = document.createElement('div');
-
             const menuWrapper = document.createElement('div');
             menuWrapper.classList.add('menu-selector')
             const menuTheoric = document.createElement('p');
             menuTheoric.innerHTML = 'Estimation Théorique';
             const menuModel = document.createElement('p');
-            menuModel.innerHTML = 'Estimation Modèle';
+            menuModel.innerHTML = 'Estimation Personnalisée';
+
+            menuTheoric.onclick = () => {
+                document.getElementsByClassName('content-value-wrapper')[0].remove()
+                document.querySelector('.nb-panels-selection').remove()
+                infoWrapper.appendChild(theoView(building));
+            }
+
+            menuModel.onclick = () => {
+                document.getElementsByClassName('content-value-wrapper')[0].remove()
+                infoWrapper.appendChild(modelView(building))
+            }
+
             menuWrapper.appendChild(menuTheoric)
             menuWrapper.appendChild(menuModel)
-
-            // Pot box
-            const contentValueWrapper = document.createElement('div')
-            contentValueWrapper.classList.add('content-value-wrapper');
-
-            const potentialValue = parseFloat(building.properties.annual_prod).toFixed(2);
-            const [titlePot, boxPot] = createInfoBox('Potentiel généré', potentialValue, 'kWh/an', 'solar', '')
-
-            potentialSection.appendChild(titlePot)
-            potentialSection.appendChild(boxPot)
-
-            // Eco Box
-            const ecoValue = parseFloat(building.properties.spare_co2).toFixed(2);
-            const [titleEco, boxEco] = createInfoBox('CO2 économisé', ecoValue, 'CO2/an', 'eco', '')
-
-            ecologySection.appendChild(titleEco)
-            ecologySection.appendChild(boxEco)
-
-            // Price box
-            const priceValue = 100000;
-            const [titlePrix, boxPrice] = createInfoBox('Prix de la pose', priceValue, '€', 'price', '')
-
-            priceSection.appendChild(titlePrix)
-            priceSection.appendChild(boxPrice)
-
-            // amortization box
-            const amortizationValue = 2;
-            const [titleamortization, boxamortization] = createInfoBox('Amorti dans', amortizationValue, 'an(s)', 'amortization', '')
-
-            amortizationSection.appendChild(titleamortization)
-            amortizationSection.appendChild(boxamortization)
-
-            
-            contentValueWrapper.appendChild(potentialSection)
-            contentValueWrapper.appendChild(ecologySection)
-            contentValueWrapper.appendChild(priceSection)
-            contentValueWrapper.appendChild(amortizationSection)
-
             infoWrapper.appendChild(menuWrapper)
-            infoWrapper.appendChild(contentValueWrapper)
+            infoWrapper.appendChild(theoView(building));
+
         }
 
     }
