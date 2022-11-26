@@ -3,15 +3,12 @@ import model from '../model_result.json' assert {type: 'json'};
 
 export const INFO = (function () {
 
-    let userConso = 19000;
     let userRoofSuperficy = 100;
 
     const infoWrapper = document.getElementsByClassName('info-wrapper')[0];
 
     const KWH_PRICE = 0.3377;
-    const KWH_M2 = 110;
     const MODEL_PROD = parseFloat(model.production).toFixed(2)
-    const ELECT_PERCENT = 0.17
     const PANEL_SIZE = 2
 
     const COLORS = {
@@ -190,9 +187,9 @@ export const INFO = (function () {
         return infoGraphWrapper;
     }
 
-    function getAmortization(nPanel, pot, conso){
+    function getAmortization(nPanel, pot){
         let cout_installation = getPosePrice(nPanel)
-        let economie = (pot - conso) * KWH_PRICE
+        let economie = pot * KWH_PRICE
         return Math.ceil(cout_installation / economie)
     }
 
@@ -239,8 +236,8 @@ export const INFO = (function () {
         priceSection.appendChild(boxPrice)
 
         // amortization box
-        let nbPanels = Math.floor(building.properties.roof_superficy / 1.5)
-        const amortizationValue = getAmortization(nbPanels, potentialValue, (KWH_M2 * building.properties.roof_superficy)*ELECT_PERCENT)
+        let nbPanels = Math.floor(building.properties.roof_superficy / PANEL_SIZE)
+        const amortizationValue = getAmortization(nbPanels, potentialValue)
         const [titleamortization, boxamortization] = createInfoBox('Amorti dans ±', amortizationValue, 'an(s)', 'amortization', '')
 
         amortizationSection.appendChild(titleamortization)
@@ -256,7 +253,7 @@ export const INFO = (function () {
         return view
     }
 
-    function modelView(building){
+    function modelView(){
 
         resetView()
 
@@ -311,7 +308,7 @@ export const INFO = (function () {
                 newNbPanel = 0
             }
 
-            const maxPanel = Math.floor(userRoofSuperficy)
+            const maxPanel = Math.floor(userRoofSuperficy / PANEL_SIZE)
             if(newNbPanel >= maxPanel){
                 e.target.value = maxPanel;
                 newNbPanel = maxPanel
@@ -321,8 +318,8 @@ export const INFO = (function () {
             boxPot.querySelector('.box-value').innerHTML = parseFloat(newNbPanel * MODEL_PROD).toFixed(2);
             boxPrice.querySelector('.box-value').innerHTML = getPosePrice(newNbPanel)
 
-            let amortizationValue = getAmortization(newNbPanel, newNbPanel * MODEL_PROD, userConso)
-            if(amortizationValue < 0){
+            let amortizationValue = getAmortization(newNbPanel, newNbPanel * MODEL_PROD)
+            if(amortizationValue <= 0){
                 amortizationValue = 'jamais'
             }
             else{
@@ -348,13 +345,9 @@ export const INFO = (function () {
     }
 
     return {
-        setConso: function(c){
-            userConso = c;
-        },
         setRoofSuperficy: function(s){
             userRoofSuperficy = s;
         },
-        conso: userConso,
         superficy: userRoofSuperficy,
         displayQuartRanking: function (districts) {
             resetInfo()
@@ -425,8 +418,6 @@ export const INFO = (function () {
             const potentialValue = parseFloat(district.properties.quart_prod).toFixed(2);
             const [titlePot, boxPot] = createInfoBox('Potentiel généré', potentialValue, 'kWh/an', 'solar', districtName)
 
-            const meanProd = MAP.districtProdMean();
-
             // Add potential graph
 
             potentialSection.appendChild(titlePot)
@@ -474,8 +465,6 @@ export const INFO = (function () {
             menuWrapper.appendChild(menuModel)
             infoWrapper.appendChild(menuWrapper)
             infoWrapper.appendChild(theoView(building));
-
         }
-
     }
 })()
